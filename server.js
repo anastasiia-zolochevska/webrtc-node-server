@@ -1,5 +1,5 @@
 var express = require('express');
-var server = require('./server-runner.js')
+var server = require('./server_runner.js')
 
 var port = process.env.PORT || 3001;
 
