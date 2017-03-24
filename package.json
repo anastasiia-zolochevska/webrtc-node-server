@@ -8,6 +8,7 @@
     "express": "^4.15.2",
     "socket.io": "^1.7.3",
     "socket.io-client": "^1.7.3",
-    "wrtc": "0.0.61"
+    "wrtc": "0.0.61",
+    "promise": "7.1.1"
   }
 }
