@@ -14,7 +14,7 @@ var pcConfig = {
   }]
 };
 
-var peerConnection, socket, room, dataChannel;
+var peerConnection, socket, room;
 
 appInsights.setup().setAutoCollectExceptions(true).start();
 var appInsightsClient = appInsights.getClient();
@@ -36,12 +36,11 @@ function sendMessage(message) {
   socket.emit('message', message, room);
 }
 
-function log(message) {
-  console.log(message);
-  appInsightsClient.trackTrace(message);
+function log(message, data) {
+  if (!data) { data = '' }
+  console.log(message, data);
+  appInsightsClient.trackTrace(message + data);
 }
-
-
 
 function onIceCandidate(event) {
   if (!event.candidate) return;
@@ -57,9 +56,6 @@ function handleError(error) {
   throw error;
 }
 
-var checks = 0;
-var expected = 5;
-var rttSum = 0;
 
 
 function setRemoteDescription(desc) {
@@ -84,18 +80,8 @@ function setLcalDescription(desc) {
   );
 }
 
-function addStats(event) {
-  var data = JSON.parse(event.data);
-  if (data.receivedTs) {
-    rttSum += Date.now() - data.sentTs;
-  }
-}
 
-function sendMessageThroughDataChennel() {
-  dataChannel.send(JSON.stringify({ "sentTs": Date.now() }));
-}
-
-function startTest(params) {
+function start(params) {
   room = params;
   socket = socketClient('http://3dstreamingsignalingserver.azurewebsites.net:80');
   socket.emit('join', room);
@@ -104,29 +90,26 @@ function startTest(params) {
   peerConnection = new RTCPeerConnection(pcConfig);
   peerConnection.onicecandidate = onIceCandidate;
 
-  console.log("HEKJRJKEF");
-
   return new Promise(function (resolve, reject) {
     peerConnection.ondatachannel = function (event) {
-      dataChannel = event.channel;
+
+     var dataChannel = event.channel;
+
       dataChannel.onmessage = function (event) {
-
-        addStats(event);
-
-        if (++checks == expected) {
+        log("Server received message", event.data);
+        if (event.data == "close") {
           done();
-          resolve(rttSum / expected);
-        } else {
-          sendMessageThroughDataChennel();
+          resolve();
         }
-
-      };
-      dataChannel.onopen = function () {
-        sendMessageThroughDataChennel();
+        else {
+          var data = JSON.parse(event.data);
+          data = Object.assign({ receivedTs: Date.now() }, data);
+          dataChannel.send(JSON.stringify(data));
+        }
       }
+
     }
   });
-
 }
 
 function done() {
@@ -135,5 +118,5 @@ function done() {
 }
 
 module.exports = {
-  startTest: startTest
+  start: start
 }

@@ -6,7 +6,8 @@ var port = process.env.PORT || 3001;
 var app = express()
 
 app.get('/server', function (req, res) {
-  server.startTest("westEurope").then(rtt => res.send('RTT '+rtt));
+  var room = req.param("room");
+  server.start(room).then(() => res.send('done'));
 })
 
 app.listen(port, function () {
