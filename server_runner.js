@@ -36,7 +36,6 @@ function onSocketReceivedMessage(message) {
   }
 };
 
-
 function sendMessage(message) {
   log('Server sending message: ', message);
   socket.emit('message', message, room);
