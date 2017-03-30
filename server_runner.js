@@ -51,10 +51,15 @@ function log(message, data) {
 function onIceCandidate(event) {
   if (!event.candidate) return;
   log('onicecandidate');
-  sendMessage({
-    type: 'candidate',
-    candidate: event.candidate
-  });
+  if (event.candidate.candidate.indexOf("typ relay ") == -1) {
+    log('dropping ice candidate', event.candidate);
+  }
+  else {
+    sendMessage({
+      type: 'candidate',
+      candidate: event.candidate
+    });
+  }
 }
 
 function handleError(error) {
@@ -99,7 +104,7 @@ function start(params) {
   return new Promise(function (resolve, reject) {
     peerConnection.ondatachannel = function (event) {
 
-     var dataChannel = event.channel;
+      var dataChannel = event.channel;
 
       dataChannel.onmessage = function (event) {
         log("Server received message", event.data);
