@@ -10,9 +10,9 @@ var RTCIceCandidate = webrtc.RTCIceCandidate;
 
 var pcConfig = {
   'iceServers': [
-    {
-      'url': 'stun:stun.l.google.com:19302'
-    },
+    // {
+    //   'url': 'stun:stun.l.google.com:19302'
+    // },
     {
       url: 'turn:13.65.204.45:3478',
       credential: '3Dstreaming0317',
@@ -49,16 +49,15 @@ function log(message, data) {
 
 function onIceCandidate(event) {
   if (!event.candidate) return;
-  log('onicecandidate');
   if (event.candidate.candidate.indexOf("typ relay ") == -1) {
-    log('dropping ice candidate', event.candidate);
+    log('dropping ice candidate', event.candidate.candidate);
   }
   else {
     sendMessage({
       type: 'candidate',
       candidate: event.candidate
     });
-    log('candidate', event.candidate.candidate);
+    log('Relay candidate', event.candidate.candidate);
   }
 }
 
